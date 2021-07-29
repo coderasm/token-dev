@@ -1,0 +1,8 @@
+node_modules
+secrets
+
+#hardhat files
+deployments
+cache
+artifacts
+frontend/src/hardhat
