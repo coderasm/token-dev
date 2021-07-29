@@ -2,6 +2,18 @@
     "bscTestnet": [],
     "bscMainnet": [],
     "localhost": [
+        {
+            "time": "7-29-2021T13:55:7",
+            "contract": "0x0C9Af3D040eF856AaD9C809247b7ddE12B0DbbD8",
+            "claimer": "0xDf2454b8E7800ed6DaD178Fcf71D76e456b2663A",
+            "pair": "0x4d4d60419d7a7B112455d338D676B9EACC76bDe0"
+        },
+        {
+            "time": "7-29-2021T14:0:51",
+            "contract": "0x0C9Af3D040eF856AaD9C809247b7ddE12B0DbbD8",
+            "claimer": "0xDf2454b8E7800ed6DaD178Fcf71D76e456b2663A",
+            "pair": "0x4d4d60419d7a7B112455d338D676B9EACC76bDe0"
+        }
     ],
     "hardhat": []
 }

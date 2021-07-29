@@ -11,13 +11,17 @@ async function main() {
     const claimerFactory = await ethers.getContractFactory(Config.claimer);
     const claimer = await claimerFactory.attach(Config.networks[activeNetwork].addresses.claimer);
     const Pair = await ethers.getContractFactory("Pair");
+    const pairAddress = await token.pancakeswapV2Pair();
+    const pair = await Pair.attach(pairAddress);
+    const tokenDecimals = await token.decimals();
+    const tokenDivisor = ethers.BigNumber.from(10).pow(tokenDecimals);
+    const lpDecimals = await pair.decimals();
+    const lpDivisor = ethers.BigNumber.from(10).pow(lpDecimals);
     const accounts = await ethers.getSigners();
     const admin = accounts[0].address;
     const marketing = accounts[1].address;
     const buyback = accounts[2].address;
 
-    const pairAddress = await token.pancakeswapV2Pair();
-    const pair = await Pair.attach(pairAddress);
     console.log(`Contract Address: ${token.address}`);
     console.log(`Claimer Address: ${claimer.address}`);
     console.log(`Pair Address: ${pairAddress}`);
@@ -28,11 +32,11 @@ async function main() {
     var totalRewards = await token.totalRewards()
     console.log(`Total rewards: ${ethers.utils.formatEther(totalRewards)}`);
     console.log(`Trading Enabled: ${await token.tradingEnabled()}`);
-    console.log(`Admin LP Balance: ${await pair.balanceOf(admin)}`);
-    console.log(`Admin token balance: ${await token.balanceOf(admin)}`);
-    console.log(`Marketing token balance: ${await token.balanceOf(marketing)}`);
-    console.log(`Burned tokens: ${await token.balanceOf(Config.networks[activeNetwork].addresses.dead)}`);
-    console.log(`Burned LP: ${await pair.balanceOf(Config.networks[activeNetwork].addresses.dead)}`);
+    console.log(`Admin LP Balance: ${(await pair.balanceOf(admin)).div(lpDivisor)}`);
+    console.log(`Admin token balance: ${(await token.balanceOf(admin)).div(tokenDivisor)}`);
+    console.log(`Marketing token balance: ${(await token.balanceOf(marketing)).div(tokenDivisor)}`);
+    console.log(`Burned tokens: ${(await token.balanceOf(Config.networks[activeNetwork].addresses.dead)).div(tokenDivisor)}`);
+    console.log(`Burned LP: ${(await pair.balanceOf(Config.networks[activeNetwork].addresses.dead)).div(lpDivisor)}`);
   }
   catch(e) {
     console.log(e);
