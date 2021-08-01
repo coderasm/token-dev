@@ -21,7 +21,7 @@ async function main() {
     await claimer.setTokenAddress(token.address);
     await claimer.setPayoutTokenAddress(Config.networks[activeNetwork].addresses.BUSD);
     var pair = await token.pancakeswapV2Pair();
-    Deployments[activeNetwork][Deployments[activeNetwork].length - 1].pair = pair;
+    (<any>Deployments[activeNetwork][Deployments[activeNetwork].length - 1]).pair = pair;
     Config.networks[activeNetwork].addresses.pair = pair;
     fs.writeFileSync("./deployments.json", JSON.stringify(Deployments, null, 4));
     fs.writeFileSync("./config.json", JSON.stringify(Config, null, 4));

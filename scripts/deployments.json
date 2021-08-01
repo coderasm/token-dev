@@ -1,18 +1,19 @@
 {
     "bscTestnet": [],
-    "bscMainnet": [],
+    "bscMainnet": [
+        {
+            "time": "8-1-2021T10:30:41",
+            "contract": "0xD584895945ac437bc0dE5D1214AF574c582a0824",
+            "claimer": "0xE7637a6Fa44c292547b785e5Dd2D3eDdEF32E20C",
+            "pair": "0x88b706B28C24Ee32832a7DE15B8b9640669e5966"
+        }
+    ],
     "localhost": [
         {
-            "time": "7-29-2021T13:55:7",
-            "contract": "0x0C9Af3D040eF856AaD9C809247b7ddE12B0DbbD8",
-            "claimer": "0xDf2454b8E7800ed6DaD178Fcf71D76e456b2663A",
-            "pair": "0x4d4d60419d7a7B112455d338D676B9EACC76bDe0"
-        },
-        {
-            "time": "7-29-2021T14:0:51",
-            "contract": "0x0C9Af3D040eF856AaD9C809247b7ddE12B0DbbD8",
-            "claimer": "0xDf2454b8E7800ed6DaD178Fcf71D76e456b2663A",
-            "pair": "0x4d4d60419d7a7B112455d338D676B9EACC76bDe0"
+            "time": "8-1-2021T8:51:50",
+            "contract": "0x533436a088d90c03092D18ADFFfe9da58Dd5Aec4",
+            "claimer": "0x5dEb9ED0Df138a32fEfe767aBDb76c2bB33b9E5b",
+            "pair": "0x3fFb192618a65D7A4d46FfbA01d8BB054316f417"
         }
     ],
     "hardhat": []

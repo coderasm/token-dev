@@ -12,22 +12,23 @@ pragma solidity ^0.8.5;
 // SPDX-License-Identifier: MIT
 
 /*
-    
-  ______          __     ______      __            
- /_  __/__  _____/ /_   /_  __/___  / /_____  ____ 
-  / / / _ \/ ___/ __/    / / / __ \/ //_/ _ \/ __ \
- / / /  __(__  ) /_     / / / /_/ / ,< /  __/ / / /
-/_/  \___/____/\__/    /_/  \____/_/|_|\___/_/ /_/ 
-                                                   
+ _   _                               ______                        
+| | | |                              |  _  \                       
+| |_| |_   _ _ __   __ _ _ __ _   _  | | | |___   __ _  __ _  ___  
+|  _  | | | | '_ \ / _` | '__| | | | | | | / _ \ / _` |/ _` |/ _ \ 
+| | | | |_| | | | | (_| | |  | |_| | | |/ / (_) | (_| | (_| | (_) |
+\_| |_/\__,_|_| |_|\__, |_|   \__, | |___/ \___/ \__, |\__, |\___/ 
+                    __/ |      __/ |              __/ | __/ |      
+                   |___/      |___/              |___/ |___/       
 
-    Check the website : https://testtoken.finance
-    Check the telegram : https://t.me/testtoken_official
+    Check the website : https://hungrydoggo.finance
+    Check the telegram : https://t.me/HungryDoggo
 */
 
 /**
  * Clarifications
  * 
- *  - every transfer is taxed 10% -> 5% to LP, and 5% to the BNB printer.
+ *  - every transfer is taxed 10% -> 2% to LP, 3% to buyback and 10% to the BNB printer.
  *  - the LP tax is accumulated in the contract, when it reaches a threshold half of those rewards are sold 
  *      in V2 and the resulting BNB + remainder of rewards is added to V2 LP (the LP tokens are held by the owner,
  *      which is the dead address if ownership is renounced). that way LP grows and price is less volatile.
@@ -35,7 +36,7 @@ pragma solidity ^0.8.5;
  *  - there is only an owner. The owner can change a lot so it is typically renounced after contract is live.
  * 
  */
-contract TestToken is Context, IERC20, Ownable {
+contract HungryDoggo is Context, IERC20, Ownable {
     
     // Settings for the contract (supply, taxes, ...)
     address public immutable deadAddress = 0x000000000000000000000000000000000000dEaD;
@@ -48,20 +49,20 @@ contract TestToken is Context, IERC20, Ownable {
     uint256 private _rTotal = (MAX - (MAX % _tTotal));
     uint256 private _tFeeTotal;
 
-    string private _name = "TestToken";
-    string private _symbol = "TT";
+    string private _name = "HungryDoggo";
+    string private _symbol = "HUNGRY";
     uint8 private _decimals = 9;
 
     uint256 public _taxFee = 0; 
     uint256 private _previousTaxFee = _taxFee;
 
-    uint256 public _liquidityFee = 50;
+    uint256 public _liquidityFee = 20;
     uint256 private _previousLiquidityFee = _liquidityFee;
     
     uint256 public _rewardFee = 100;
     uint256 private _previousRewardFee = _rewardFee;
 
-    uint256 public _buyBackFee = 0;
+    uint256 public _buyBackFee = 30;
     uint256 private _previousBuybackFee = _buyBackFee;
     uint256 private minForGas = 4 * 10**15;
 
@@ -571,7 +572,7 @@ contract TestToken is Context, IERC20, Ownable {
     }
 
     function swapAndLiquify(uint256 contractTokenBalance) private lockTheSwap {
-        uint256 totalFee = _liquidityFee.add(_rewardFee);
+        uint256 totalFee = _liquidityFee.add(_rewardFee).add(_buyBackFee);
         uint256 forLiquidity = _liquidityFee.mul(contractTokenBalance).div(totalFee).div(2);
         uint256 remnant = contractTokenBalance.sub(forLiquidity);
         // Capture the contract's current BNB balance.
@@ -585,11 +586,15 @@ contract TestToken is Context, IERC20, Ownable {
         uint256 acquiredBNB = address(this).balance.sub(initialBalance);
         // Add liquidity to pancakeswap
         uint256 liquidityBNB = acquiredBNB.mul(forLiquidity).div(remnant);
-        uint256 rewardBNB = acquiredBNB.sub(liquidityBNB);
-        //uint256 buyBackBNB = rewardBNB;
-        _BNBRewards = _BNBRewards.add(rewardBNB);
-        sendToClaimer(rewardBNB);
-        //sendToBuyBack(buyBackBNB);
+        uint256 remainingBNB = acquiredBNB.sub(liquidityBNB);
+        uint256 remainingTotalFee = _rewardFee.add(_buyBackFee);
+        if(remainingTotalFee > 0) {
+            uint256 rewardBNB = remainingBNB.mul(_rewardFee).div(remainingTotalFee);
+            uint256 buyBackBNB = remainingBNB.mul(_buyBackFee).div(remainingTotalFee);
+            _BNBRewards = _BNBRewards.add(rewardBNB);
+            sendToClaimer(rewardBNB);
+            sendToBuyBack(buyBackBNB);
+        }
         addLiquidity(forLiquidity, liquidityBNB);
         emit SwapAndLiquify(forLiquidity, liquidityBNB);
     }

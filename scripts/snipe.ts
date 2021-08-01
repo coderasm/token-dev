@@ -15,7 +15,7 @@ async function main() {
     const buyback = accounts[2];
     const sniping = accounts[3];
 
-    await snipe(".1");
+    await snipe(".05");
 
     async function snipe(amount:string) {
       const amountIn = ethers.utils.parseEther(amount);

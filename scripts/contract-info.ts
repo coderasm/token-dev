@@ -29,6 +29,8 @@ async function main() {
     console.log(`Contract address on claimer: ${await claimer._tokenAddress()}`);
     var claimerBalance = await ethers.provider.getBalance(claimer.address);
     console.log(`Claimer Balance: ${ethers.utils.formatEther(claimerBalance)}`);
+    var buybackBalance = await ethers.provider.getBalance(buyback);
+    console.log(`Buyback Balance: ${ethers.utils.formatEther(buybackBalance)}`);
     var totalRewards = await token.totalRewards()
     console.log(`Total rewards: ${ethers.utils.formatEther(totalRewards)}`);
     console.log(`Trading Enabled: ${await token.tradingEnabled()}`);

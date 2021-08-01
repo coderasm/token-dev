@@ -1,7 +1,7 @@
 {
-    "contract": "TestToken",
+    "contract": "HungryDoggo",
     "claimer": "Claimer",
-    "liquidity": "1",
+    "liquidity": ".8",
     "networks": {
         "bscTestnet": {
             "addresses": {
@@ -19,9 +19,9 @@
             "addresses": {
                 "WBNB": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
                 "BUSD": "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56",
-                "claimer": "",
-                "contract": "",
-                "pair": "",
+                "claimer": "0xE7637a6Fa44c292547b785e5Dd2D3eDdEF32E20C",
+                "contract": "0xD584895945ac437bc0dE5D1214AF574c582a0824",
+                "pair": "0x88b706B28C24Ee32832a7DE15B8b9640669e5966",
                 "router": "0x10ED43C718714eb63d5aA57B78B54704E256024E",
                 "factory": "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73",
                 "dead": "0x000000000000000000000000000000000000dead"
@@ -31,9 +31,9 @@
             "addresses": {
                 "WBNB": "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
                 "BUSD": "0x8301F2213c0eeD49a7E28Ae4c3e91722919B8B47",
-                "claimer": "0xDf2454b8E7800ed6DaD178Fcf71D76e456b2663A",
-                "contract": "0x0C9Af3D040eF856AaD9C809247b7ddE12B0DbbD8",
-                "pair": "0x4d4d60419d7a7B112455d338D676B9EACC76bDe0",
+                "claimer": "0xE7637a6Fa44c292547b785e5Dd2D3eDdEF32E20C",
+                "contract": "0x533436a088d90c03092D18ADFFfe9da58Dd5Aec4",
+                "pair": "0x3fFb192618a65D7A4d46FfbA01d8BB054316f417",
                 "router": "0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3",
                 "factory": "",
                 "dead": "0x000000000000000000000000000000000000dead"
