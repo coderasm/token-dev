@@ -34,10 +34,10 @@ async function main() {
     const liquidity = totalSupply.sub(burnAmount.add(marketingAmount));
 
     //Burn
-    //await burn();
+    await burn();
 
     //Move to marketing
-    //await moveToMarketing();
+    await moveToMarketing();
 
     //Add liquidity
     await addLiquidity();
