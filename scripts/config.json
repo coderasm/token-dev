@@ -31,9 +31,9 @@
             "addresses": {
                 "WBNB": "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
                 "BUSD": "0x8301F2213c0eeD49a7E28Ae4c3e91722919B8B47",
-                "claimer": "0xE7637a6Fa44c292547b785e5Dd2D3eDdEF32E20C",
-                "contract": "0x533436a088d90c03092D18ADFFfe9da58Dd5Aec4",
-                "pair": "0x3fFb192618a65D7A4d46FfbA01d8BB054316f417",
+                "claimer": "0x66FD3B14D2DE10c3f85DdF5292BeAb6421688412",
+                "contract": "0x805D767BE9E0467D36A9f83bc3ccbf72006A6737",
+                "pair": "0x4d4d60419d7a7B112455d338D676B9EACC76bDe0",
                 "router": "0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3",
                 "factory": "",
                 "dead": "0x000000000000000000000000000000000000dead"

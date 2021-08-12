@@ -14,6 +14,12 @@
             "contract": "0x533436a088d90c03092D18ADFFfe9da58Dd5Aec4",
             "claimer": "0x5dEb9ED0Df138a32fEfe767aBDb76c2bB33b9E5b",
             "pair": "0x3fFb192618a65D7A4d46FfbA01d8BB054316f417"
+        },
+        {
+            "time": "8-12-2021T12:27:31",
+            "contract": "0x0C9Af3D040eF856AaD9C809247b7ddE12B0DbbD8",
+            "claimer": "0xDf2454b8E7800ed6DaD178Fcf71D76e456b2663A",
+            "pair": "0x4d4d60419d7a7B112455d338D676B9EACC76bDe0"
         }
     ],
     "hardhat": []

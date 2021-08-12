@@ -40,10 +40,10 @@ async function main() {
   fs.writeFileSync("./scripts/config.json", JSON.stringify(Config, null, 4));
 
   async function setContractAddresses() {
-    await contract.migrateRouter(Config.networks[activeNetwork].addresses.router);
+    //await contract.migrateRouter(Config.networks[activeNetwork].addresses.router);
     await contract.setClaimerAddress(claimer.address);
     await contract.setBuybackAddress(buyback.address);
-    await claimer.migrateRouter(Config.networks[activeNetwork].addresses.router);
+    //await claimer.migrateRouter(Config.networks[activeNetwork].addresses.router);
     await claimer.setTokenAddress(contract.address);
     await claimer.setPayoutTokenAddress(Config.networks[activeNetwork].addresses.BUSD);
     console.log(`Contract addresses set`);
