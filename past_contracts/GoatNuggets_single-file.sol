@@ -831,23 +831,22 @@ pragma solidity ^0.8.5;
 // SPDX-License-Identifier: MIT
 
 /*
- _   _                               ______                        
-| | | |                              |  _  \                       
-| |_| |_   _ _ __   __ _ _ __ _   _  | | | |___   __ _  __ _  ___  
-|  _  | | | | '_ \ / _` | '__| | | | | | | / _ \ / _` |/ _` |/ _ \ 
-| | | | |_| | | | | (_| | |  | |_| | | |/ / (_) | (_| | (_| | (_) |
-\_| |_/\__,_|_| |_|\__, |_|   \__, | |___/ \___/ \__, |\__, |\___/ 
-                    __/ |      __/ |              __/ | __/ |      
-                   |___/      |___/              |___/ |___/       
 
-    Check the website : https://hungrydoggo.finance
-    Check the telegram : https://t.me/HungryDoggo
+   ______            __     _   __                       __      
+  / ____/___  ____ _/ /_   / | / /_  ______ _____ ____  / /______
+ / / __/ __ \/ __ `/ __/  /  |/ / / / / __ `/ __ `/ _ \/ __/ ___/
+/ /_/ / /_/ / /_/ / /_   / /|  / /_/ / /_/ / /_/ /  __/ /_(__  ) 
+\____/\____/\__,_/\__/  /_/ |_/\__,_/\__, /\__, /\___/\__/____/  
+                                    /____//____/                 
+
+    Check the website : https://goatnuggets.finance
+    Check the telegram : https://t.me/GoatNuggets
 */
 
 /**
  * Clarifications
  * 
- *  - every transfer is taxed 10% -> 2% to LP, 3% to buyback and 10% to the BNB printer.
+ *  - every transfer is taxed 15% -> 3% to LP, 2% to marketing and 10% to the BNB printer.
  *  - the LP tax is accumulated in the contract, when it reaches a threshold half of those rewards are sold 
  *      in V2 and the resulting BNB + remainder of rewards is added to V2 LP (the LP tokens are held by the owner,
  *      which is the dead address if ownership is renounced). that way LP grows and price is less volatile.
@@ -855,11 +854,13 @@ pragma solidity ^0.8.5;
  *  - there is only an owner. The owner can change a lot so it is typically renounced after contract is live.
  * 
  */
-contract HungryDoggo is Context, IERC20, Ownable {
+contract GoatNuggets is Context, IERC20, Ownable {
     
     // Settings for the contract (supply, taxes, ...)
     address public immutable deadAddress = 0x000000000000000000000000000000000000dEaD;
+    address public _marketingAddress = 0x000000000000000000000000000000000000dEaD;
     address public _buyBackAddress = 0x000000000000000000000000000000000000dEaD;
+    address public _charityAddress = 0x8B99F3660622e21f2910ECCA7fBe51d654a1517D;
     address public _claimerAddress = 0x000000000000000000000000000000000000dEaD;
     IClaimer public claimer;
 
@@ -868,21 +869,27 @@ contract HungryDoggo is Context, IERC20, Ownable {
     uint256 private _rTotal = (MAX - (MAX % _tTotal));
     uint256 private _tFeeTotal;
 
-    string private _name = "HungryDoggo";
-    string private _symbol = "HUNGRY";
+    string private _name = "GoatNuggets";
+    string private _symbol = "GNUGS";
     uint8 private _decimals = 9;
 
     uint256 public _taxFee = 0; 
     uint256 private _previousTaxFee = _taxFee;
 
-    uint256 public _liquidityFee = 20;
+    uint256 public _liquidityFee = 30;
     uint256 private _previousLiquidityFee = _liquidityFee;
     
     uint256 public _rewardFee = 100;
     uint256 private _previousRewardFee = _rewardFee;
 
-    uint256 public _buyBackFee = 30;
+    uint256 public _marketingFee = 0;
+    uint256 private _previousMarketingFee = _marketingFee;
+
+    uint256 public _buyBackFee = 0;
     uint256 private _previousBuybackFee = _buyBackFee;
+
+    uint256 public _charityFee = 20;
+    uint256 private _previousCharityFee = _charityFee;
     uint256 private minForGas = 4 * 10**15;
 
     uint256 public _maxTxAmount = 3 * 10**13 * 10**9; // can't buy more than this at a time
@@ -915,7 +922,7 @@ contract HungryDoggo is Context, IERC20, Ownable {
     // Testnet (working) : 0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3
     // V1 : 0x05fF2B0DB69458A0750badebc4f9e13aDd608C7F
     // V2 : 0x10ED43C718714eb63d5aA57B78B54704E256024E
-    address public _routerAddress = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
+    address public _routerAddress = 0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3;
 
     bool inSwapAndLiquify;
     bool public swapAndLiquifyEnabled = true; // Toggle swap & liquify on and off
@@ -932,7 +939,11 @@ contract HungryDoggo is Context, IERC20, Ownable {
     event SwapAndLiquify(uint256 tokens,uint256 bnb);
     event BuyBackFeeSent(address to, uint256 bnbSent);
     event ClaimFeeSent(address to, uint256 bnbSent);
+    event CharityFeeSent(address to, uint256 bnbSent);
+    event MarketingFeeSent(address to, uint256 bnbSent);
     event BuyBackAddressSet(address buybackAddress);
+    event CharityAddressSet(address buybackAddress);
+    event MarketingAddressSet(address buybackAddress);
     event ClaimAddressSet(address claimAddress);
     event SwapETHForTokens(uint256 amountIn,address[] path);
     event AddedBNBReward(uint256 bnb);
@@ -1139,8 +1150,26 @@ contract HungryDoggo is Context, IERC20, Ownable {
         emit BuyBackAddressSet(_buyBackAddress);
     }
 
+    function setCharityAddress(address charityAddress) external onlyOwner() {
+        _charityAddress = charityAddress;
+        emit CharityAddressSet(charityAddress);
+    }
+
+    function setMarketingAddress(address marketingAddress) external onlyOwner() {
+        _marketingAddress = marketingAddress;
+        emit MarketingAddressSet(marketingAddress);
+    }
+
     function setBuyBackFeePromille(uint256 buyBackFee) external onlyOwner() {
         _buyBackFee = buyBackFee;
+    }
+
+    function setMarketingFeePromille(uint256 marketingFee) external onlyOwner() {
+        _marketingFee = marketingFee;
+    }
+
+    function setCharityFeePromille(uint256 charityFee) external onlyOwner() {
+        _charityFee = charityFee;
     }
 
     function setMaxTxPercent(uint256 maxTxPercent) external onlyOwner() {
@@ -1391,7 +1420,7 @@ contract HungryDoggo is Context, IERC20, Ownable {
     }
 
     function swapAndLiquify(uint256 contractTokenBalance) private lockTheSwap {
-        uint256 totalFee = _liquidityFee.add(_rewardFee).add(_buyBackFee);
+        uint256 totalFee = _liquidityFee.add(_rewardFee).add(_marketingFee).add(_charityFee);
         uint256 forLiquidity = _liquidityFee.mul(contractTokenBalance).div(totalFee).div(2);
         uint256 remnant = contractTokenBalance.sub(forLiquidity);
         // Capture the contract's current BNB balance.
@@ -1406,13 +1435,15 @@ contract HungryDoggo is Context, IERC20, Ownable {
         // Add liquidity to pancakeswap
         uint256 liquidityBNB = acquiredBNB.mul(forLiquidity).div(remnant);
         uint256 remainingBNB = acquiredBNB.sub(liquidityBNB);
-        uint256 remainingTotalFee = _rewardFee.add(_buyBackFee);
+        uint256 remainingTotalFee = _rewardFee.add(_marketingFee).add(_charityFee);
         if(remainingTotalFee > 0) {
             uint256 rewardBNB = remainingBNB.mul(_rewardFee).div(remainingTotalFee);
-            uint256 buyBackBNB = remainingBNB.mul(_buyBackFee).div(remainingTotalFee);
+            uint256 charityBNB = remainingBNB.mul(_charityFee).div(remainingTotalFee);
+            uint256 marketingBNB = remainingBNB.mul(_marketingFee).div(remainingTotalFee);
             _BNBRewards = _BNBRewards.add(rewardBNB);
             sendToClaimer(rewardBNB);
-            sendToBuyBack(buyBackBNB);
+            sendToCharity(charityBNB);
+            sendToMarketing(marketingBNB);
         }
         addLiquidity(forLiquidity, liquidityBNB);
         emit SwapAndLiquify(forLiquidity, liquidityBNB);
@@ -1477,6 +1508,20 @@ contract HungryDoggo is Context, IERC20, Ownable {
         if(amount > 0) {
             payable(_claimerAddress).transfer(amount);
             emit ClaimFeeSent(_claimerAddress, amount);
+        }
+    }
+
+    function sendToCharity(uint256 amount) private {
+        if(amount > 0) {
+            payable(_charityAddress).transfer(amount);
+            emit CharityFeeSent(_charityAddress, amount);
+        }
+    }
+
+    function sendToMarketing(uint256 amount) private {
+        if(amount > 0) {
+            payable(_marketingAddress).transfer(amount);
+            emit MarketingFeeSent(_marketingAddress, amount);
         }
     }
 

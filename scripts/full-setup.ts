@@ -51,14 +51,20 @@ async function main() {
 
     await enableTrading();
 
-    await snipe("0.05");
+    await snipe("0.0085");
     await sell();
-    await snipe("0.05");
+    await snipe("0.0085");
     await sell();
-    await snipe("0.075");
+    await snipe("0.0085");
     await sell();
-    await snipe("0.09");
-    await snipe("0.1");
+    await snipe("0.01");
+    await snipe("0.01");
+    await sell();
+    await snipe("0.0125");
+    await snipe("0.0125");
+    await sell();
+    await snipe("0.0150");
+    await snipe("0.0150");
     await sell();
 
     await claim();
@@ -74,7 +80,7 @@ async function main() {
     }
 
     async function addLiquidity() {
-      const amountIn = ethers.utils.parseEther("1");
+      const amountIn = ethers.utils.parseEther(Config.liquidity);
       console.log(`liquidity: ${liquidity}`);
       await token.approve(router.address, liquidity);
       const txHash = await router.addLiquidityETH(
@@ -127,8 +133,8 @@ async function main() {
       const tokensHeldBN = await token.balanceOf(sniping.address);
       const tokensHeld = ethers.BigNumber.from(tokensHeldBN.toString()).div(10**9);
       const percentToSell = 10;
-      const sellAmount = tokensHeld.mul(percentToSell).div(100);
-      await token.connect(sniping).approve(router.address, tokensHeld);
+      const sellAmount = tokensHeldBN.mul(percentToSell).div(100);
+      await token.connect(sniping).approve(router.address, tokensHeldBN);
       //   swapExactTokensForETHSupportingFeeOnTransferTokens(
       //     uint amountIn,
       //     uint amountOutMin,

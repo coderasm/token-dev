@@ -837,7 +837,7 @@ contract Claimer is Context, Ownable {
     address public _tokenAddress = 0x000000000000000000000000000000000000dEaD;
     // mainnet: 0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56
     // testnet: 0x8301F2213c0eeD49a7E28Ae4c3e91722919B8B47
-    address public _busdAddress = 0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56;
+    address public _busdAddress = 0x8301F2213c0eeD49a7E28Ae4c3e91722919B8B47;
 
     IUniswapV2Router02 public pancakeswapV2Router; // Formerly immutable
     // Testnet (not working) : 0xD99D1c33F9fC3444f8101754aBC46c52416550D1

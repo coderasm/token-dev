@@ -19,7 +19,10 @@ async function main() {
 
   //get wallet addresses
   const accounts = await ethers.getSigners();
+  const marketing = accounts[1];
   const buyback = accounts[2];
+  const snipe = accounts[3];
+  const charity = accounts[4];
 
   //Set contract addresses
   await setContractAddresses();
@@ -42,7 +45,10 @@ async function main() {
   async function setContractAddresses() {
     //await contract.migrateRouter(Config.networks[activeNetwork].addresses.router);
     await contract.setClaimerAddress(claimer.address);
-    await contract.setBuybackAddress(buyback.address);
+    //await contract.setBuybackAddress(buyback.address);
+    //await contract.setMarketingAddress(marketing.address);
+    //await contract.setCharityAddress(Config.networks[activeNetwork].addresses.charity);
+    //await contract.setCharityAddress(charity.address);
     //await claimer.migrateRouter(Config.networks[activeNetwork].addresses.router);
     await claimer.setTokenAddress(contract.address);
     await claimer.setPayoutTokenAddress(Config.networks[activeNetwork].addresses.BUSD);

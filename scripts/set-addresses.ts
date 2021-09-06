@@ -13,10 +13,13 @@ async function main() {
     const claimerFactory = await ethers.getContractFactory(Config.claimer);
     const claimer = await claimerFactory.attach(Config.networks[activeNetwork].addresses.claimer);
     const accounts = await ethers.getSigners();
+    const marketing = accounts[1];
     const buyback = accounts[2];
     await token.migrateRouter(Config.networks[activeNetwork].addresses.router);
     await token.setClaimerAddress(claimer.address);
     await token.setBuybackAddress(buyback.address);
+    await token.setMarketingAddress(marketing.address);
+    await token.setCharityAddress(Config.networks[activeNetwork].addresses.charity);
     await claimer.migrateRouter(Config.networks[activeNetwork].addresses.router);
     await claimer.setTokenAddress(token.address);
     await claimer.setPayoutTokenAddress(Config.networks[activeNetwork].addresses.BUSD);

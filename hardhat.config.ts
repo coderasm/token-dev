@@ -24,6 +24,7 @@ const config: HardhatUserConfig = {
     hardhat: {
       forking: {
         url: "https://data-seed-prebsc-1-s1.binance.org:8545"
+        //url: "https://bsc-dataseed.binance.org/"
       },
       chainId: 1337,
       inject: false, // optional. If true, it will EXPOSE your mnemonic in your frontend code. Then it would be available as an "in-page browser wallet" / signer which can sign without confirmation.
@@ -79,6 +80,24 @@ const config: HardhatUserConfig = {
       },
       {
         version: "0.7.3",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+      },
+      {
+        version: "0.6.12",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+      },
+      {
+        version: "0.5.16",
         settings: {
           optimizer: {
             enabled: true,

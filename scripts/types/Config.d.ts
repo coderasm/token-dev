@@ -1,6 +1,7 @@
 export interface Config {
     contract: string,
     claimer: string,
+    bep20: string,
     networks: Networks
 }
 
@@ -19,7 +20,9 @@ export interface CommonAddresses {
     WBNB: string,
     claimer: string,
     contract: string,
+    WBTC: string,
     pair: string,
+    charity: string,
     router: string,
     factory: string,
     dead: string

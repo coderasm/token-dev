@@ -23,8 +23,8 @@ async function main() {
       const tokensHeldBN = await token.balanceOf(sniping.address);
       const tokensHeld = ethers.BigNumber.from(tokensHeldBN.toString()).div(10**9);
       const percentToSell = 10;
-      const sellAmount = tokensHeld.mul(percentToSell).div(100);
-      await token.connect(sniping).approve(router.address, tokensHeld);
+      const sellAmount = tokensHeldBN.mul(percentToSell).div(100);
+      await token.connect(sniping).approve(router.address, tokensHeldBN);
       //   swapExactTokensForETHSupportingFeeOnTransferTokens(
       //     uint amountIn,
       //     uint amountOutMin,

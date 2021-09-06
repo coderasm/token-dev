@@ -6,3 +6,4 @@ deployments
 cache
 artifacts
 frontend/src/hardhat
+/bin/
