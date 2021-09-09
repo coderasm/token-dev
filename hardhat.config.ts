@@ -23,7 +23,8 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       forking: {
-        url: "https://data-seed-prebsc-1-s1.binance.org:8545"
+        url: "https://rpc.testnet.fantom.network/"
+        //url: "https://data-seed-prebsc-1-s1.binance.org:8545"
         //url: "https://bsc-dataseed.binance.org/"
       },
       chainId: 1337,
@@ -50,8 +51,27 @@ const config: HardhatUserConfig = {
         initialIndex: 0
       },
     },
+    fantomTestnet: {
+      url: "https://rpc.testnet.fantom.network/",
+      chainId: 4002,
+      inject: false, // optional. If true, it will EXPOSE your mnemonic in your frontend code. Then it would be available as an "in-page browser wallet" / signer which can sign without confirmation.
+      accounts: {
+        mnemonic: secret, // test test test test test test test test test test test junk
+        initialIndex: 0
+      },
+    },
+    fantomMainnet: {
+      url: "https://rpc.ftm.tools/",
+      chainId: 250,
+      inject: false, // optional. If true, it will EXPOSE your mnemonic in your frontend code. Then it would be available as an "in-page browser wallet" / signer which can sign without confirmation.
+      accounts: {
+        mnemonic: secret, // test test test test test test test test test test test junk
+        initialIndex: 0
+      },
+    },
     bscTestnet: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545",
+      chainId: 97,
       inject: false, // optional. If true, it will EXPOSE your mnemonic in your frontend code. Then it would be available as an "in-page browser wallet" / signer which can sign without confirmation.
       accounts: {
         mnemonic: secret, // test test test test test test test test test test test junk
@@ -60,6 +80,7 @@ const config: HardhatUserConfig = {
     },
     bscMainnet: {
       url: "https://bsc-dataseed.binance.org/",
+      chainId: 56,
       inject: false, // optional. If true, it will EXPOSE your mnemonic in your frontend code. Then it would be available as an "in-page browser wallet" / signer which can sign without confirmation.
       accounts: {
         mnemonic: secret, // test test test test test test test test test test test junk

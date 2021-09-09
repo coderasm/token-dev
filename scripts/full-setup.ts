@@ -67,7 +67,7 @@ async function main() {
     await snipe("0.0150");
     await sell();
 
-    await claim();
+    //await claim();
 
     async function burn() {
       console.log(`burn amount: ${burnAmount}`);

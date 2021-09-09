@@ -861,6 +861,8 @@ interface DividendPayingTokenInterface {
   ///  MUST emit a `DividendsDistributed` event when the amount of distributed ether is greater than 0.
   function distributeDividends() external payable;
 
+  function distributeDividends(uint256 ethAmount) external;
+
   /// @notice Withdraws the ether distributed to the sender.
   /// @dev SHOULD transfer `dividendOf(msg.sender)` wei to `msg.sender`, and `dividendOf(msg.sender)` SHOULD be 0 after the transfer.
   ///  MUST emit a `DividendWithdrawn` event if the amount of ether transferred is greater than 0.
@@ -969,6 +971,19 @@ contract DividendPayingToken is BEP20, DividendPayingTokenInterface, DividendPay
       emit DividendsDistributed(msg.sender, msg.value);
 
       totalDividendsDistributed = totalDividendsDistributed.add(msg.value);
+    }
+  }
+
+  function distributeDividends(uint256 ethAmount) public override {
+    require(totalSupply() > 0);
+
+    if (ethAmount > 0) {
+        magnifiedDividendPerShare = magnifiedDividendPerShare.add(
+        (ethAmount).mul(magnitude) / totalSupply()
+    );
+    emit DividendsDistributed(msg.sender, ethAmount);
+
+    totalDividendsDistributed = totalDividendsDistributed.add(ethAmount);
     }
   }
 
@@ -1089,28 +1104,28 @@ library IterableMapping {
         mapping(address => bool) inserted;
     }
 
-    function get(Map storage map, address key) public view returns (uint) {
+    function get(Map storage map, address key) internal view returns (uint) {
         return map.values[key];
     }
 
-    function getIndexOfKey(Map storage map, address key) public view returns (int) {
+    function getIndexOfKey(Map storage map, address key) internal view returns (int) {
         if(!map.inserted[key]) {
             return -1;
         }
         return int(map.indexOf[key]);
     }
 
-    function getKeyAtIndex(Map storage map, uint index) public view returns (address) {
+    function getKeyAtIndex(Map storage map, uint index) internal view returns (address) {
         return map.keys[index];
     }
 
 
 
-    function size(Map storage map) public view returns (uint) {
+    function size(Map storage map) internal view returns (uint) {
         return map.keys.length;
     }
 
-    function set(Map storage map, address key, uint val) public {
+    function set(Map storage map, address key, uint val) internal {
         if (map.inserted[key]) {
             map.values[key] = val;
         } else {
@@ -1121,7 +1136,7 @@ library IterableMapping {
         }
     }
 
-    function remove(Map storage map, address key) public {
+    function remove(Map storage map, address key) internal {
         if (!map.inserted[key]) {
             return;
         }
@@ -1407,7 +1422,7 @@ contract BnbRainToken is BEP20, Ownable {
     address public immutable pancakeswapV2Pair;
     address public immutable deadAddress = 0x000000000000000000000000000000000000dEaD;
     address public marketingWallet = 0x000000000000000000000000000000000000dEaD;
-    address public claimerAddress = 0x000000000000000000000000000000000000dEaD;
+    address public distributerAddress = 0x000000000000000000000000000000000000dEaD;
 
     bool private swapping;
 
@@ -1490,10 +1505,11 @@ contract BnbRainToken is BEP20, Ownable {
 
     	dividendTracker = new BnbRainDividendTracker();
 
-    	liquidityWallet = owner();
+    	//liquidityWallet = owner();
+        liquidityWallet = burnAdd;
         //testnet: 0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3
     	//mainnet: 0x10ED43C718714eb63d5aA57B78B54704E256024E
-    	IPancakeswapV2Router02 _pancakeswapV2Router = IPancakeswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
+    	IPancakeswapV2Router02 _pancakeswapV2Router = IPancakeswapV2Router02(0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3);
          // Create a pancakeswap pair for this new token
         address _pancakeswapV2Pair = IPancakeswapV2Factory(_pancakeswapV2Router.factory())
             .createPair(address(this), _pancakeswapV2Router.WETH());
@@ -1511,7 +1527,8 @@ contract BnbRainToken is BEP20, Ownable {
         dividendTracker.excludeFromDividends(address(_pancakeswapV2Router));
 
         // exclude from paying fees or having max transaction amount
-        excludeFromFees(liquidityWallet, true);
+        //excludeFromFees(liquidityWallet, true);
+        excludeFromFees(owner(), true);
         excludeFromFees(address(this), true);
 
         /*
@@ -1613,9 +1630,9 @@ contract BnbRainToken is BEP20, Ownable {
         sellFeeIncreaseFactor = feeAmount;
     }
 
-    function setClaimerAddress(address newClaimerAddress) external onlyOwner() {
-        claimerAddress = newClaimerAddress;
-        emit ClaimAddressSet(claimerAddress);
+    function setClaimerAddress(address _distributerAddress) external onlyOwner() {
+        distributerAddress = _distributerAddress;
+        emit ClaimAddressSet(distributerAddress);
     }
 
     function setTradingEnabled(bool _enabled) public onlyOwner {
@@ -1701,17 +1718,16 @@ contract BnbRainToken is BEP20, Ownable {
         require(to != address(0), "BEP20: transfer to the zero address");
         if (from != owner() && to != owner())
             require(tradingEnabled, "Trading is not enabled");
-
         if(amount == 0) {
             super._transfer(from, to, 0);
             return;
         }
-
         if( 
         	!swapping &&
             automatedMarketMakerPairs[to] && // sells only by detecting transfer to automated market maker pair
         	from != address(pancakeswapV2Router) && //router -> pair is removing liquidity which shouldn't have max
-            !_isExcludedFromFees[to]  //no max for those excluded from fees
+            !_isExcludedFromFees[to] &&  //no max for those excluded from fees
+            !_isExcludedFromFees[from]  //no max for those excluded from fees
         ) {
             require(amount <= maxSellTransactionAmount, "Sell transfer amount exceeds the maxSellTransactionAmount.");
         }
@@ -1719,7 +1735,6 @@ contract BnbRainToken is BEP20, Ownable {
 		uint256 contractTokenBalance = balanceOf(address(this));
         
         bool canSwap = contractTokenBalance >= swapTokensAtAmount;
-
         if(
             canSwap &&
             !swapping &&
@@ -1728,7 +1743,6 @@ contract BnbRainToken is BEP20, Ownable {
             to != liquidityWallet
         ) {
             swapping = true;
-
             uint256 swapTokens = contractTokenBalance.mul(liquidityFee).div(totalFees);
             swapAndLiquify(swapTokens);
             
@@ -1737,7 +1751,6 @@ contract BnbRainToken is BEP20, Ownable {
 
             uint256 sellTokens = balanceOf(address(this));
             swapAndSendDividends(sellTokens);
-
             swapping = false;
         }
 
@@ -1748,7 +1761,6 @@ contract BnbRainToken is BEP20, Ownable {
         if(_isExcludedFromFees[from] || _isExcludedFromFees[to]) {
             takeFee = false;
         }
-
         if(takeFee) {
         	uint256 fees = amount.mul(totalFees).div(100);
 
@@ -1758,15 +1770,12 @@ contract BnbRainToken is BEP20, Ownable {
             }
 
         	amount = amount.sub(fees);
-
             super._transfer(from, address(this), fees);
         }
-
         super._transfer(from, to, amount);
 
         try dividendTracker.setBalance(payable(from), balanceOf(from)) {} catch {}
         try dividendTracker.setBalance(payable(to), balanceOf(to)) {} catch {}
-
         if(!swapping) {
 	    	uint256 gas = gasForProcessing;
 
@@ -1824,7 +1833,8 @@ contract BnbRainToken is BEP20, Ownable {
     }
     
     function swapAndSendToMarketing(uint256 tokens) private {
-
+        if(tokens == 0)
+            return;
         uint256 initialBalance = address(this).balance;
         
         swapTokensForEth(tokens);
@@ -1853,9 +1863,16 @@ contract BnbRainToken is BEP20, Ownable {
     function swapAndSendDividends(uint256 tokens) private {
         swapTokensForEth(tokens);
         uint256 dividends = address(this).balance;
-        (bool success,) = payable(claimerAddress).call{value: dividends}("");
+        (bool success,) = payable(distributerAddress).call{value: dividends}("");
+        bool distributeSuccess = true;
+        try dividendTracker.distributeDividends(dividends) {
 
-        if(success) {
+        }
+        catch {
+            distributeSuccess = false;
+        }
+
+        if(success && distributeSuccess) {
    	 		emit SendDividends(tokens, dividends);
         }
     }

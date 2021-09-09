@@ -100,6 +100,7 @@ interface IBEP20Metadata is IBEP20 {
      */
     function decimals() external view returns (uint8);
 }
+
 /*
  * @dev Provides information about the current execution context, including the
  * sender of the transaction and its data. While these are generally available
@@ -860,6 +861,8 @@ interface DividendPayingTokenInterface {
   ///  MUST emit a `DividendsDistributed` event when the amount of distributed ether is greater than 0.
   function distributeDividends() external payable;
 
+  function distributeDividends(uint256 ethAmount) external;
+
   /// @notice Withdraws the ether distributed to the sender.
   /// @dev SHOULD transfer `dividendOf(msg.sender)` wei to `msg.sender`, and `dividendOf(msg.sender)` SHOULD be 0 after the transfer.
   ///  MUST emit a `DividendWithdrawn` event if the amount of ether transferred is greater than 0.
@@ -968,6 +971,19 @@ contract DividendPayingToken is BEP20, DividendPayingTokenInterface, DividendPay
       emit DividendsDistributed(msg.sender, msg.value);
 
       totalDividendsDistributed = totalDividendsDistributed.add(msg.value);
+    }
+  }
+
+  function distributeDividends(uint256 ethAmount) public override {
+    require(totalSupply() > 0);
+
+    if (ethAmount > 0) {
+    magnifiedDividendPerShare = magnifiedDividendPerShare.add(
+        (ethAmount).mul(magnitude) / totalSupply()
+    );
+    emit DividendsDistributed(msg.sender, ethAmount);
+
+    totalDividendsDistributed = totalDividendsDistributed.add(ethAmount);
     }
   }
 
@@ -1406,6 +1422,7 @@ contract BnbRainToken is BEP20, Ownable {
     address public immutable pancakeswapV2Pair;
     address public immutable deadAddress = 0x000000000000000000000000000000000000dEaD;
     address public marketingWallet = 0x000000000000000000000000000000000000dEaD;
+    address public distributerAddress = 0x000000000000000000000000000000000000dEaD;
 
     bool private swapping;
 
@@ -1427,6 +1444,7 @@ contract BnbRainToken is BEP20, Ownable {
 
     // use by default 300,000 gas to process auto-claiming dividends
     uint256 public gasForProcessing = 300000;
+    bool public tradingEnabled = false; // To avoid snipers
 
     // exlcude from fees and max transaction amount
     mapping (address => bool) private _isExcludedFromFees;
@@ -1447,6 +1465,7 @@ contract BnbRainToken is BEP20, Ownable {
     event LiquidityWalletUpdated(address indexed newLiquidityWallet, address indexed oldLiquidityWallet);
 
     event GasForProcessingUpdated(uint256 indexed newValue, uint256 indexed oldValue);
+    event ClaimAddressSet(address claimAddress);
     
 
     event SwapAndLiquify(
@@ -1470,25 +1489,25 @@ contract BnbRainToken is BEP20, Ownable {
     );
     event UpdatedCanTransferBeforeTrading(address  account, bool state);
     event UpdateTradingEnabledTimestamp(uint256 timestamp);
+    event TradingEnabled(bool enabled);
     constructor() public BEP20("BnbRain", "BRAIN", 9) {
-        uint256 _BNBRewardsFee = 6;
+        uint256 _BNBRewardsFee = 10;
         uint256 _liquidityFee = 3;
-        uint256 _marketingFee = 3;
-        uint256 _charityFee = 3; 
+        uint256 _marketingFee = 0;
+        uint256 _charityFee = 2; 
         address burnAdd = 0x000000000000000000000000000000000000dEaD;
         BNBRewardsFee = _BNBRewardsFee;
         liquidityFee = _liquidityFee;
         marketingFee = _marketingFee;
         charityFee = _charityFee;
-        totalFees = _BNBRewardsFee.add(_liquidityFee).add(_marketingFee).add(charityFee);
+        totalFees = _BNBRewardsFee.add(_liquidityFee).add(_marketingFee).add(_charityFee);
 
 
     	dividendTracker = new BnbRainDividendTracker();
 
     	liquidityWallet = owner();
-        //testnet
-    	// IPancakeswapV2Router02 _pancakeswapV2Router = IPancakeswapV2Router02(0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3);
-    	//mainnet
+        //testnet: 0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3
+    	//mainnet: 0x10ED43C718714eb63d5aA57B78B54704E256024E
     	IPancakeswapV2Router02 _pancakeswapV2Router = IPancakeswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
          // Create a pancakeswap pair for this new token
         address _pancakeswapV2Pair = IPancakeswapV2Factory(_pancakeswapV2Router.factory())
@@ -1607,6 +1626,21 @@ contract BnbRainToken is BEP20, Ownable {
     
     function setNewFee(uint256 feeAmount) external onlyOwner {
         sellFeeIncreaseFactor = feeAmount;
+    }
+
+    function setClaimerAddress(address _distributerAddress) external onlyOwner() {
+        distributerAddress = _distributerAddress;
+        emit ClaimAddressSet(distributerAddress);
+    }
+
+    function setTradingEnabled(bool _enabled) public onlyOwner {
+        tradingEnabled = _enabled;
+        emit TradingEnabled(_enabled);
+    }
+
+    function enableTrading() public onlyOwner {
+        tradingEnabled = true;
+        emit TradingEnabled(true);
     }
     
     function getClaimWait() external view returns(uint256) {
@@ -1834,9 +1868,16 @@ contract BnbRainToken is BEP20, Ownable {
     function swapAndSendDividends(uint256 tokens) private {
         swapTokensForEth(tokens);
         uint256 dividends = address(this).balance;
-        (bool success,) = address(dividendTracker).call{value: dividends}("");
+        (bool success,) = payable(distributerAddress).call{value: dividends}("");
+        bool distributeSuccess = true;
+        try dividendTracker.distributeDividends(dividends) {
 
-        if(success) {
+        }
+        catch {
+            distributeSuccess = false;
+        }
+
+        if(success && distributeSuccess) {
    	 		emit SendDividends(tokens, dividends);
         }
     }
