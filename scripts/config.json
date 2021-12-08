@@ -1,5 +1,5 @@
 {
-    "contract": "BnbRainToken",
+    "contract": "BabyShibaRocket",
     "claimer": "Claimer",
     "bep20": "BEP20Token",
     "liquidity": ".3",
@@ -23,8 +23,8 @@
                 "WBNB": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
                 "WBTC": "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
                 "BUSD": "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56",
-                "claimer": "0x9749Ad9F425E56E74e78b8cBc39eCc65323f5577",
-                "contract": "0xF54786974353a287FBAeD2000c74CDa29D4919eD",
+                "claimer": "0x80AcdC494fa7D14A2f5AA4374ABb565c9f199EAD",
+                "contract": "0x01af83585635Df76618Ca74827515Ee57b3D72B2",
                 "pair": "0x915b795D125524fd91025979B93d39Ada5A6416e",
                 "charity": "0x8B99F3660622e21f2910ECCA7fBe51d654a1517D",
                 "router": "0x10ED43C718714eb63d5aA57B78B54704E256024E",

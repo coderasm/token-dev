@@ -10,8 +10,8 @@ import * as fs from "fs";
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
-const secret = fs.readFileSync("./secrets/.secret-testnet").toString().trim();
-//const secret = fs.readFileSync("./secrets/.secret-mainnet").toString().trim();
+//const secret = fs.readFileSync("./secrets/.secret-testnet").toString().trim();
+const secret = fs.readFileSync("./secrets/.secret-mainnet").toString().trim();
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -23,8 +23,8 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       forking: {
-        url: "https://rpc.testnet.fantom.network/"
-        //url: "https://data-seed-prebsc-1-s1.binance.org:8545"
+        //url: "https://rpc.testnet.fantom.network/"
+        url: "https://data-seed-prebsc-1-s1.binance.org:8545"
         //url: "https://bsc-dataseed.binance.org/"
       },
       chainId: 1337,

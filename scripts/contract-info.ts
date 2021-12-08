@@ -26,7 +26,7 @@ async function main() {
     console.log(`Contract Address: ${token.address}`);
     console.log(`Claimer Address: ${claimer.address}`);
     console.log(`Pair Address: ${pairAddress}`);
-    console.log(`Claimer address on contract: ${await token.distributerAddress()}`);
+    console.log(`Claimer address on contract: ${await token.a_claimerAddress_a()}`);
     console.log(`Contract address on claimer: ${await claimer._tokenAddress()}`);
     var contractBalance = await ethers.provider.getBalance(token.address);
     console.log(`Contract Balance: ${ethers.utils.formatEther(contractBalance)}`);
@@ -38,9 +38,10 @@ async function main() {
     console.log(`Charity Balance: ${ethers.utils.formatEther(charityBalance)}`);
     // var buybackBalance = await ethers.provider.getBalance(buyback);
     // console.log(`Buyback Balance: ${ethers.utils.formatEther(buybackBalance)}`);
-    var totalRewards = await token.getTotalDividendsDistributed()
+    //var totalRewards = await token.getTotalDividendsDistributed();
+    var totalRewards = await token.totalRewards();
     console.log(`Total rewards: ${ethers.utils.formatEther(totalRewards)}`);
-    console.log(`Trading Enabled: ${await token.tradingEnabled()}`);
+    console.log(`Trading Enabled: ${await token.a_tradingEnabled_a()}`);
     console.log(`Admin LP Balance: ${(await pair.balanceOf(admin)).div(lpDivisor)}`);
     console.log(`Admin token balance: ${(await token.balanceOf(admin)).div(tokenDivisor)}`);
     var marketingBalance = await ethers.provider.getBalance(marketing);
